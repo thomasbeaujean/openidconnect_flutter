@@ -365,6 +365,13 @@ class OpenIdConnectClient {
         var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
         refreshTime -= Duration(minutes: 1);
 
+        // there is a limit for the duration of a timer (at least for flutter web)
+        // the duration can not be > 24days, 20h, 31min
+        // so for a duration > 1 day, we try once a day to refresh and renew the timer
+        if (refreshTime.inDays > 1) {
+          refreshTime = Duration(days: 1);
+        }
+
         _autoRenewTimer = Future.delayed(refreshTime, refresh);
       }
 
@@ -405,6 +412,13 @@ class OpenIdConnectClient {
       var refreshTime = _identity!.expiresAt.difference(DateTime.now().toUtc());
 
       refreshTime -= Duration(minutes: 1);
+
+      // there is a limit for the duration of a timer (at least for flutter web)
+      // the duration can not be > 24days, 20h, 31min
+      // so for a duration > 1 day, we try once a day to refresh and renew the timer
+      if (refreshTime.inDays > 1) {
+        refreshTime = Duration(days: 1);
+      }
 
       _autoRenewTimer = Future.delayed(refreshTime, refresh);
       return true;
